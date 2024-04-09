@@ -22,7 +22,9 @@ app.get("/scrape", async (req, res) => {
 
   (async () => {
     const browser = await puppeteer.launch({
-      channel: "chrome",
+      headless: true
+     // channel: "chrome",
+      //executablePath: "/usr/bin/google-chrome-stable",
     });
 
     const page = await browser.newPage();

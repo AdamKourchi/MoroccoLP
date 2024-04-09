@@ -1,5 +1,7 @@
 import puppeteer from "puppeteer";
 import express from "express";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 const PORT = 3000;
@@ -21,11 +23,12 @@ app.get("/scrape", async (req, res) => {
 
   (async () => {
     const browser = await puppeteer.launch(
-      //{
+      {
       //headless: true
      // channel: "chrome",
-      //executablePath: "/usr/bin/google-chrome-stable",
-   // }
+     args: ["--no-sandbox", "--disable-setuid-sandbox","--no-zygote","--single-process"],
+      executablePath: process.env.NODE_ENV === "production" ? process.env.puppeteer_excutable_path : puppeteer.executablePath(), 
+   }
     );
 
     const page = await browser.newPage();

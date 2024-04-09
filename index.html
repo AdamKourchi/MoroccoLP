@@ -354,9 +354,9 @@
         try {
           loading.style.display = "flex";
           const citiesParam = encodeURIComponent(cities.join(","));
-          const scrapeResponse = await fetch(
-            `http://localhost:3000/scrape?cities=${citiesParam}`
-          );
+         // const scrapeResponse = await fetch( `http://localhost:3000/scrape?cities=${citiesParam}`);
+          const scrapeResponse = await fetch( `https://moroccolp.onrender.com/scrape?cities=${citiesParam}`);
+
 
           if (!scrapeResponse.ok) {
             throw new Error("Failed to initiate scraping");
@@ -376,7 +376,9 @@
       const fetchLogs = async () => {
         const intervalId = setInterval(async () => {
           try {
-            const logsResponse = await fetch("http://localhost:3000/logs");
+          //  const logsResponse = await fetch("http://localhost:3000/logs");
+            const logsResponse = await fetch("https://moroccolp.onrender.com/logs");
+
             if (!logsResponse.ok) {
               throw new Error("Failed to fetch logs");
             }

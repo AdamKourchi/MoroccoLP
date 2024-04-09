@@ -1,6 +1,5 @@
 import puppeteer from "puppeteer";
 import express from "express";
-import fs from "fs";
 
 const app = express();
 const PORT = 3000;
@@ -80,15 +79,6 @@ app.get("/scrape", async (req, res) => {
     console.log(allPosts);
     await browser.close();
     scrapingLogs.push("Scraping completed");
-    //write all post in a json file 
-    fs.writeFile("./allPosts.json", JSON.stringify(allPosts), (err) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      console.log("All posts written to file");
-    });
-
     res.json(allPosts);
 
   })();

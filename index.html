@@ -224,7 +224,7 @@
 
         console.log(selectedValues);
         fetchData(selectedValues);
-        fetchLogs();
+       // fetchLogs();
       });
 
       const loading = document.getElementById("loading-container");
@@ -269,9 +269,6 @@
             const range = match.split("-").map((year) => parseInt(year)); // Split range if it exists
             return range.length === 1 ? range[0] : range; // Return either standalone year or range
           });
-
-          console.log(year);
-
           const universityMatch = title.match(
             /(Sciences du Sport|ISIT|INAS|I3S|I2S|Abdelmalek|Ossoul|ISMAC|ISIC|Mohammed-V|IRFCJS|IRFC|UM6P|ISSS|ISS|IMS|FLLA|FEG|Chariaa|FLASH|EST|ENCG|ENSA|ISPM|Ibn Zohr|FSJES|FSA|FS|FP|ESEF|FLSH|ENS|ESEF|ESITH|ISCAE)/
           );
@@ -321,12 +318,16 @@
           if (yearIndex === -1) {
             // Year not found, create new year object
             transformedData[cityIndex]._children[
-              universityIndex]._children.push({ university: "",
-              year:`${year[0][0]}-${year[0][1]}`,
+              universityIndex
+            ]._children.push({
+              university: "",
+              year: `${year[0][0]}-${year[0][1]}`,
               program: `<a href='${href}'>${title}</a>`,
               href: href,
             });
-            yearIndex =  transformedData[cityIndex]._children[universityIndex]._children.length - 1;
+            yearIndex =
+              transformedData[cityIndex]._children[universityIndex]._children
+                .length - 1;
           } else {
             transformedData[cityIndex]._children[universityIndex]._children[
               yearIndex
@@ -349,13 +350,12 @@
       // Local Data:
       const originalData = localData;
 
-      // Function to initiate scraping and fetch logs
       const fetchData = async (cities) => {
         try {
           loading.style.display = "flex";
           const citiesParam = encodeURIComponent(cities.join(","));
-         // const scrapeResponse = await fetch( `http://localhost:3000/scrape?cities=${citiesParam}`);
-          const scrapeResponse = await fetch( `https://moroccolp.onrender.com/scrape?cities=${citiesParam}`);
+      //    const scrapeResponse = await fetch(`https://moroccolp.onrender.com/scrape?cities=${citiesParam}`  );
+          const scrapeResponse = await fetch(`http://localhost:3000/scrape?cities=${citiesParam}`  );
 
 
           if (!scrapeResponse.ok) {
@@ -363,21 +363,28 @@
           }
           const scrapeData = await scrapeResponse.json();
           console.log(scrapeData);
-          const transformedData = transformData(scrapeData);
+          const transformedData = transformData(scrapeData.posts); // Use the posts property from the response
           console.log(transformedData);
           createTable(transformedData);
+          loading.style.display = "none";
+
+          // Start fetching logs after initiating the scraping
+        //  fetchLogs(scrapeData.requestId); // Pass the request ID to the fetchLogs function
         } catch (error) {
           console.error("Error:", error);
           loading.style.display = "none";
-          console.log("An error occurred");
+          alert("An error occurred");
+          loading.style.display = "none";
+
         }
       };
 
-      const fetchLogs = async () => {
+      const fetchLogs = async (requestId) => {
         const intervalId = setInterval(async () => {
           try {
-          //  const logsResponse = await fetch("http://localhost:3000/logs");
-            const logsResponse = await fetch("https://moroccolp.onrender.com/logs");
+            const logsResponse = await fetch(
+              `https://moroccolp.onrender.com/logs/${requestId}`
+            ); // Include the request ID in the URL
 
             if (!logsResponse.ok) {
               throw new Error("Failed to fetch logs");
@@ -390,8 +397,8 @@
             if (logsData[logsData.length - 1] === "Scraping completed") {
               loading.style.display = "none";
               const emptyLogsResponse = await fetch(
-                "http://localhost:3000/emptylogs"
-              );
+                `https://moroccolp.onrender.com/emptylogs/${requestId}`
+              ); // Include the request ID in the URL
               clearInterval(intervalId); // Stop the interval
             }
           } catch (error) {

@@ -1,12 +1,14 @@
 import puppeteer from "puppeteer";
 import express from "express";
 import dotenv from "dotenv";
+import { v4 as uuidv4 } from 'uuid';
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
-let scrapingLogs = []; // Array to store scraping logs
+let logsMap = new Map(); // Map to store logs for each request
+
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -22,11 +24,11 @@ app.get("/scrape", async (req, res) => {
   }
 
   (async () => {
+    let requestId = uuidv4(); // Generate a unique ID for this request
+    let scrapingLogs = []; // Array to store scraping logs for this request
+
     const browser = await puppeteer.launch(
-      {
-      //headless: true
-     // channel: "chrome",
-     args: ["--no-sandbox", "--disable-setuid-sandbox","--no-zygote","--single-process"],
+      {args: ["--no-sandbox", "--disable-setuid-sandbox","--no-zygote","--single-process"],
       executablePath: process.env.NODE_ENV === "production" ? process.env.puppeteer_excutable_path : puppeteer.executablePath(), 
    }
     );
@@ -81,22 +83,27 @@ app.get("/scrape", async (req, res) => {
       allPosts = allPosts.concat(posts); // Concatenate the posts from this city to the allPosts array
     }
 
-    console.log(allPosts);
     await browser.close();
     scrapingLogs.push("Scraping completed");
-    res.json(allPosts);
+    logsMap.set(requestId, scrapingLogs); // Store the logs for this request
+    res.json({ requestId, posts: allPosts }); // Include the request ID in the response
+
 
   })();
 });
 
-app.get("/logs", (req, res) => {
-  res.json(scrapingLogs);
-});
+app.get("/logs/:id", (req, res) => {
+  let logs = logsMap.get(req.params.id); // Get the logs for the requested ID
+  if (logs) {
+    res.json(logs);
+  } else {
+    res.status(404).json({ message: "Logs not found" });
+  }});
 
-app.get("/emptylogs", (req, res) => {
-  scrapingLogs = [];
-  res.json({ message: "Logs emptied" });
-});
+  app.get("/emptylogs/:id", (req, res) => {
+    logsMap.delete(req.params.id); // Delete the logs for the requested ID
+    res.json({ message: "Logs emptied" });
+  });
 
 const server = app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

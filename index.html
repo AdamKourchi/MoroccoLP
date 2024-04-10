@@ -354,8 +354,8 @@
         try {
           loading.style.display = "flex";
           const citiesParam = encodeURIComponent(cities.join(","));
-      //    const scrapeResponse = await fetch(`https://moroccolp.onrender.com/scrape?cities=${citiesParam}`  );
-          const scrapeResponse = await fetch(`http://localhost:3000/scrape?cities=${citiesParam}`  );
+          const scrapeResponse = await fetch(`https://moroccolp.onrender.com/scrape?cities=${citiesParam}`  );
+         // const scrapeResponse = await fetch(`http://localhost:3000/scrape?cities=${citiesParam}`  );
 
 
           if (!scrapeResponse.ok) {
